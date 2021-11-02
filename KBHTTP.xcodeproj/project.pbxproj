@@ -22,7 +22,7 @@
 		6E7B2F082728E26B0061AE94 /* RequestSenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E7B2F072728E26B0061AE94 /* RequestSenderTests.swift */; };
 		6E7C0C6D2727D2AE0039070E /* KBHTTPInterface.docc in Sources */ = {isa = PBXBuildFile; fileRef = 6E7C0C6C2727D2AE0039070E /* KBHTTPInterface.docc */; };
 		6E7C0C732727D2AE0039070E /* KBHTTP.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E7C0C682727D2AE0039070E /* KBHTTP.framework */; };
-		6E7C0C792727D2AE0039070E /* KBHTTPInterface.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E7C0C6B2727D2AE0039070E /* KBHTTPInterface.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		6E7C0C792727D2AE0039070E /* KBHTTP.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E7C0C6B2727D2AE0039070E /* KBHTTP.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		6E7C0C852727D5780039070E /* Request.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E7C0C842727D5780039070E /* Request.swift */; };
 		6E7C0C872727D5BA0039070E /* Response.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E7C0C862727D5BA0039070E /* Response.swift */; };
 		6E7C0C892727D5CE0039070E /* RequestScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E7C0C882727D5CE0039070E /* RequestScheduler.swift */; };
@@ -62,7 +62,7 @@
 		6E4713F22730D35B00C1AA5B /* HTTPURLResponseDump.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPURLResponseDump.swift; sourceTree = "<group>"; };
 		6E7B2F072728E26B0061AE94 /* RequestSenderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestSenderTests.swift; sourceTree = "<group>"; };
 		6E7C0C682727D2AE0039070E /* KBHTTP.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = KBHTTP.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		6E7C0C6B2727D2AE0039070E /* KBHTTPInterface.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KBHTTPInterface.h; sourceTree = "<group>"; };
+		6E7C0C6B2727D2AE0039070E /* KBHTTP.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KBHTTP.h; sourceTree = "<group>"; };
 		6E7C0C6C2727D2AE0039070E /* KBHTTPInterface.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = KBHTTPInterface.docc; sourceTree = "<group>"; };
 		6E7C0C722727D2AE0039070E /* KBHTTPTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KBHTTPTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6E7C0C842727D5780039070E /* Request.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Request.swift; sourceTree = "<group>"; };
@@ -161,7 +161,7 @@
 			isa = PBXGroup;
 			children = (
 				6E7C0C822727D2E70039070E /* Sources */,
-				6E7C0C6B2727D2AE0039070E /* KBHTTPInterface.h */,
+				6E7C0C6B2727D2AE0039070E /* KBHTTP.h */,
 				6E7C0C6C2727D2AE0039070E /* KBHTTPInterface.docc */,
 			);
 			path = KBHTTP;
@@ -232,7 +232,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6E7C0C792727D2AE0039070E /* KBHTTPInterface.h in Headers */,
+				6E7C0C792727D2AE0039070E /* KBHTTP.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
