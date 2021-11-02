@@ -6,5 +6,5 @@
 
 ## LICENSE
 
-本项目采用MIT开源协议，详情[请参考这里](LICENSE.md)
+本项目采用MIT开源协议，详情[请参考这里](LICENSE)
 

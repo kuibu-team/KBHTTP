@@ -29,7 +29,7 @@ xcuserdata/
 *.dSYM
 
 ## Xcoce User Data
-KBHTTP.xcworkspace/xcuserdata
+*.xcuserdatad
 
 ## Playgrounds
 timeline.xctimeline
