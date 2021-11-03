@@ -36,8 +36,9 @@ extension URLRequest {
             result.append("\n")
         } else if let bodyData = self.httpBody {
             
+            let contentType = self.allHTTPHeaderFields?["Content-Type"]
             if decodeContent,
-               self.value(forHTTPHeaderField: "Content-Type")?.contains(KBHTTP.ContentType.json.description) == true,
+               contentType?.contains("application/json") == true,
                let json = try? JSONSerialization.jsonObject(with: bodyData, options: []) {
                 result.append("\(json)")
             } else {

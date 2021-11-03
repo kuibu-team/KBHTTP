@@ -32,6 +32,6 @@ Pod::Spec.new do |spec|
         sp.dependency 'Alamofire', '~> 5.4.0'
     end
 
-    spec.default_subspec = 'Core'    
+    spec.default_subspec = 'Core'
     
 end

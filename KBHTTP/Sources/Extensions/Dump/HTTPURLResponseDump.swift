@@ -24,9 +24,10 @@ extension HTTPURLResponse {
         }
         
         result.append("\n")
-            
+
+        let contentType = self.allHeaderFields["Content-Type"] as? String
         if decodeContent,
-           self.value(forHTTPHeaderField: "Content-Type")?.contains(KBHTTP.ContentType.json.description) == true,
+           contentType?.contains("application/json") == true,
            let json = try? JSONSerialization.jsonObject(with: data, options: []) {
             result.append("\(json)")
         } else {
