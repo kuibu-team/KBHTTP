@@ -9,11 +9,11 @@ Pod::Spec.new do |spec|
     spec.homepage      = "https://github.com/kuibu-team/KBHTTP.git"
     spec.license       = { :type => "MIT", :file => "LICENSE" }
     spec.platform      = :ios, "12.0"
-    spec.swift_version = '5.0'
+    spec.swift_version = '5.5'
     spec.author        = { "DancewithPeng" => "dancewithpeng@gmail.com" }    
     spec.source        = { :git => "https://github.com/kuibu-team/KBHTTP.git", :tag => "#{spec.version}" }
 
-    spec.source_files = "KBHTTP/Sources", "KBHTTP/Sources/KBHTTP.h"
+    # spec.source_files = "KBHTTP/Sources/KBHTTP.h"
 
     spec.subspec 'Core' do |sp|
         sp.source_files = 'KBHTTP/Sources/Core/*.{swift}'
