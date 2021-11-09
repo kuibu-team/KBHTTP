@@ -7,7 +7,7 @@
 
 import XCTest
 import KBHTTP
-
+import Alamofire
 
 class AlamofireRequestInterfaceTests: XCTestCase {
     
@@ -117,12 +117,10 @@ class AlamofireRequestInterfaceTests: XCTestCase {
 
 // MARK: - KBDemoInterface
 
-struct KBDemoResponseError: AlamofireRequestInterfaceError, AlamofireUploadInterfaceError {
+struct KBDemoResponseError: Swift.Error {
     
     var code: Int
     var message: String
-    
-    static var nullResponseValue: DemoGETInterface.ResponseError = .init(code: 100, message: "空数据")
     
     var underlying: Error?
     
@@ -138,9 +136,33 @@ struct KBDemoResponseError: AlamofireRequestInterfaceError, AlamofireUploadInter
         
         self.underlying = error
     }
+    
+    init(networkError: Error) {
+        let nserr = networkError as NSError
+        code = nserr.code
+        message = networkError.localizedDescription
+        
+        self.underlying = networkError
+    }
+    
+    init(requestError: Error) {
+        let nserr = requestError as NSError
+        code = nserr.code
+        message = requestError.localizedDescription
+        
+        self.underlying = requestError
+    }
+    
+    init(parsingError: Error) {
+        let nserr = parsingError as NSError
+        code = nserr.code
+        message = parsingError.localizedDescription
+        
+        self.underlying = parsingError
+    }
 }
 
-protocol KBDemoRequestInterface: AlamofireRequestInterface where ResponseError == KBDemoResponseError, ResponseValue: Decodable {
+protocol KBDemoRequestInterface: AlamofireRequestInterface where ResponseValue: Decodable, ResponseError == DemoResponseError {
     
 }
 
@@ -148,16 +170,24 @@ extension KBDemoRequestInterface {
     
     var dynamicHeadersProvider: DynamicHeadersProvider? { nil }
     
+    var session: Session {
+        return AF
+    }
+    
+    var requestScheduler: RequestScheduler {
+        return KBHTTP.RequestScheduler.default
+    }
+    
     /// 解析响应
     func parse(response: Response) throws -> Any? {
         guard let data = response.data else {
-            throw ResponseError.nullResponseValue
+            throw KBDemoResponseError(code: 0, message: "测试")
         }
         return try JSONDecoder().decode(ResponseValue.self, from: data)
     }
 }
 
-protocol KBDemoUploadInterface: AlamofireUploadInterface where ResponseError == KBDemoResponseError, ResponseValue: Decodable {
+protocol KBDemoUploadInterface: AlamofireUploadInterface where ResponseValue: Decodable {
     
 }
 
@@ -165,10 +195,18 @@ extension KBDemoUploadInterface {
     
     var dynamicHeadersProvider: DynamicHeadersProvider? { nil }
     
+    var session: Session {
+        return AF
+    }
+    
+    var requestScheduler: RequestScheduler {
+        return KBHTTP.RequestScheduler.default
+    }
+    
     /// 解析响应
     func parse(response: Response) throws -> Any? {
         guard let data = response.data else {
-            throw ResponseError.nullResponseValue
+            throw KBDemoResponseError(code: 0, message: "测试")
         }
         return try JSONDecoder().decode(ResponseValue.self, from: data)
     }
@@ -191,7 +229,7 @@ extension KBDemoUploadInterface {
 
 class DemoGETInterface: KBDemoRequestInterface {
     
-    var method: Request.Method = .get
+    var method: KBHTTP.Request.Method = .get
     var url: URL = URL(string: "http://localhost:8080/kbhttp/urlencoded")!
     
     struct RequestParameters: DictionaryConvertible {
@@ -213,7 +251,7 @@ class DemoGETInterface: KBDemoRequestInterface {
 
 class DemoPOSTInterface: KBDemoRequestInterface {
     
-    var method: Request.Method = .post
+    var method: KBHTTP.Request.Method = .post
     var url: URL = URL(string: "http://localhost:8080/kbhttp/urlencoded")!
     
     struct RequestParameters: DictionaryConvertible {
@@ -235,7 +273,7 @@ class DemoPOSTInterface: KBDemoRequestInterface {
 
 class DemoJSONInterface: KBDemoRequestInterface {
     
-    var method: Request.Method = .post
+    var method: KBHTTP.Request.Method = .post
     var url: URL = URL(string: "http://localhost:8080/kbhttp/json")!
     var contentType: ContentType = .json
     
@@ -257,11 +295,15 @@ class DemoJSONInterface: KBDemoRequestInterface {
 // MARK: - DemoPOSTInterface
 
 class FileUploadInterface: KBDemoUploadInterface {
+    typealias ResponseError = DemoResponseError
+    
     var url: URL = URL(string: "http://localhost:8080/kbhttp/file")!
     typealias ResponseValue = DemoResponseValue
 }
 
 class FileStreamUploadInterface: KBDemoUploadInterface {
+    typealias ResponseError = DemoResponseError
+    
     var url: URL = URL(string: "http://localhost:8080/kbhttp/file/stream")!
     typealias ResponseValue = DemoResponseValue
 }

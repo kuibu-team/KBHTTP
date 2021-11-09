@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
     spec.name         = "KBHTTP"
-    spec.version      = "1.0-rc"
+    spec.version      = "1.0-rc2"
     spec.summary      = "以接口的维度来封装请求"
     spec.description  = <<-DESC
                         以接口的维度来封装请求，以便使用和维护

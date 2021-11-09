@@ -15,10 +15,10 @@ public protocol RequestInterface {
     
     /// 请求参数
     associatedtype RequestParameters: DictionaryConvertible
-    /// 响应错误
-    associatedtype ResponseError: InterfaceError
     /// 响应值
     associatedtype ResponseValue
+    /// 响应错误
+    associatedtype ResponseError: InterfaceResponseError
     
     /// 请求方式
     var method: KBHTTP.Request.Method { get }
@@ -58,10 +58,10 @@ public extension RequestInterface {
 /// 上传接口
 public protocol UploadInterface {
     
-    /// 响应错误
-    associatedtype ResponseError: InterfaceError
     /// 响应值
     associatedtype ResponseValue
+    /// 响应错误
+    associatedtype ResponseError: InterfaceResponseError
     
     /// 请求方式
     var method: KBHTTP.Request.Method { get }
@@ -94,11 +94,7 @@ public extension UploadInterface {
     var isBlockOtherRequests: Bool { false }
 }
 
-
-// MARK: - InterfaceError
-
-/// 接口错误定义的约束
-public protocol InterfaceError: Swift.Error {
-    var underlying: Swift.Error? { get }
-    init(_ error: Swift.Error)
+/// 接口响应错误
+public protocol InterfaceResponseError: Swift.Error {
+    init(_ requestError: KBHTTP.Request.Error)
 }

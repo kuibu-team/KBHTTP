@@ -27,7 +27,7 @@ class RequestSenderTests: XCTestCase {
         let alamofireRequestSender = AlamofireRequestSender()
 
         let request = KBHTTP.Request(method: .get,
-                                              url: URL(string: "https://www.baidu.com")!,
+                                              url: URL(string: "http://localhost:8080/kbhttp/urlencoded")!,
                                               sender: alamofireRequestSender,
                                               isBlockOtherRequests: false) { request, result in
             defer {

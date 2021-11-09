@@ -48,12 +48,7 @@ extension DictionaryConvertible where Self: Encodable {
     }
 }
 
-protocol MySubInterfaceResponseError: InterfaceError {
-    static var nullValue: Self { get }
-    init(parseFailed error: Swift.Error)
-}
-
-protocol MySubInterface: KBHTTP.RequestInterface, KBHTTP.ResponseParser where ResponseError: MySubInterfaceResponseError {
+protocol MySubInterface: KBHTTP.RequestInterface, KBHTTP.ResponseParser {
     var path: String { get }
 }
 
@@ -78,12 +73,12 @@ extension MySubInterface {
             switch result {
             case .success(let response):
                 guard let value = response.value as? ResponseValue else {
-                    completionHandler(.failure(.nullValue))
+                    assertionFailure("please return the correct data type. type is \(ResponseValue.self), value is \(response.value ?? "nil")")
                     return
                 }
                 completionHandler(.success(value))
             case .failure(let error):
-                completionHandler(.failure(.init(error)))
+                completionHandler(.failure(ResponseError(error)))
             }
         }
         
@@ -107,37 +102,36 @@ class BaiduPageInterface: MySubInterface {
     
     typealias ResponseValue = String
     
-    enum ResponseError: MySubInterfaceResponseError {
+    enum ResponseError: KBHTTP.InterfaceResponseError {
                         
         case unknown(Swift.Error?)
         case incorrectType
         case parserError(Swift.Error?)
         
-        var underlying: Error? {
-            switch self {
-            case .unknown(let err):
-                return err
-            case .parserError(let err):
-                return err
-            default:
-                return nil
-            }
+        case requestError(Swift.Error)
+        case networkError(Swift.Error)
+        case parsingError(Swift.Error)
+        
+        case nullValue
+        
+        init(networkError: Error) {
+            self = .parserError(networkError)
+        }
+        
+        init(requestError: Error) {
+            self = .requestError(requestError)
+        }
+        
+        init(parsingError: Error) {
+            self = .parsingError(parsingError)
         }
         
         init(_ error: Error) {
-            if let err = error as? Self {
-                self = err
-            } else {
-                self = .unknown(error)
-            }
+            self = .unknown(error)
         }
         
-        init(parseFailed error: Error) {
-            self = .parserError(error)
-        }
-                
-        static var nullValue: BaiduPageInterface.ResponseError {
-            return .unknown(nil)
+        init(_ requestError: KBHTTP.Request.Error) {
+            self = .unknown(requestError)
         }
     }
     

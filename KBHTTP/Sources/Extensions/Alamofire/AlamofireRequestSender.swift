@@ -17,11 +17,15 @@ public class AlamofireRequestSender: KBHTTP.RequestSender {
     /// dump响应的内容，建议在Debug模式下开启，方便调试，在Release模式下关闭
     public var dumpResponse: Bool
     
+    /// AF请求的会话
+    public var session: Alamofire.Session
+    
     
     // MARK: - Interface Methods
     
     /// 初始化方法
-    public init(dumpResponse: Bool = false) {
+    public init(session: Alamofire.Session, dumpResponse: Bool = false) {
+        self.session = session
         self.dumpResponse = dumpResponse
     }
 
@@ -53,7 +57,7 @@ public class AlamofireRequestSender: KBHTTP.RequestSender {
                 }
                 
                 guard (200...299) ~= urlResponse.statusCode else {
-                    completionHandler(.failure(Error(statusCode: urlResponse.statusCode)))
+                    completionHandler(.failure(Error(responseStatusCode: urlResponse.statusCode)))
                     return
                 }
 
@@ -62,7 +66,7 @@ public class AlamofireRequestSender: KBHTTP.RequestSender {
                                                    data: data)
                 completionHandler(.success(httpResponse))
             case let .failure(error):
-                completionHandler(.failure(error))
+                completionHandler(.failure(Error.requestError(error)))
             }
         }
         
@@ -99,13 +103,13 @@ public class AlamofireRequestSender: KBHTTP.RequestSender {
         }
                 
         self.sendedRequests[request] =
-        AF.request(request.url,
-                   method: HTTPMethod(rawValue: request.method.rawValue),
-                   parameters: request.parameters,
-                   encoding: encoding,
-                   headers: HTTPHeaders(request.finalHeaders ?? [:]),
-                   interceptor: nil,
-                   requestModifier: nil)
+        self.session.request(request.url,
+                             method: HTTPMethod(rawValue: request.method.rawValue),
+                             parameters: request.parameters,
+                             encoding: encoding,
+                             headers: HTTPHeaders(request.finalHeaders ?? [:]),
+                             interceptor: nil,
+                             requestModifier: nil)
             .response(completionHandler: responseHandler)
     }
     
@@ -128,24 +132,24 @@ public class AlamofireRequestSender: KBHTTP.RequestSender {
         case .data(let data):
             // 数据内容
             self.sendedRequests[request] =
-            AF.upload(data,
-                      to: request.url,
-                      method: HTTPMethod(rawValue: request.method.rawValue),
-                      headers: headers,
-                      interceptor: nil,
-                      fileManager: .default,
-                      requestModifier: nil)
+            self.session.upload(data,
+                                to: request.url,
+                                method: HTTPMethod(rawValue: request.method.rawValue),
+                                headers: headers,
+                                interceptor: nil,
+                                fileManager: .default,
+                                requestModifier: nil)
                 .response(completionHandler: responseHandler)
         case .file(let fileURL):
             // 文件内容
             self.sendedRequests[request] =
-            AF.upload(fileURL,
-                      to: request.url,
-                      method: HTTPMethod(rawValue: request.method.rawValue),
-                      headers: headers,
-                      interceptor: nil,
-                      fileManager: .default,
-                      requestModifier: nil)
+            self.session.upload(fileURL,
+                                to: request.url,
+                                method: HTTPMethod(rawValue: request.method.rawValue),
+                                headers: headers,
+                                interceptor: nil,
+                                fileManager: .default,
+                                requestModifier: nil)
                 .response(completionHandler: responseHandler)
         }
     }
@@ -155,7 +159,7 @@ public class AlamofireRequestSender: KBHTTP.RequestSender {
         if let urlResponse = response.response,
            let urlRequest = response.request,
            let data = response.data {
-            let requestDumpText = urlRequest.dump(with: AF.session, decodeContent: true)
+            let requestDumpText = urlRequest.dump(with: self.session.session, decodeContent: true)
             let responseDumpText = urlResponse.dump(with: data, decodeContent: true)
             let dumpText = """
                            
@@ -177,17 +181,24 @@ public extension AlamofireRequestSender {
     
     /// 请求发送器的错误
     enum Error: Swift.Error {
+        
         /// 没有请求
         case noRequest
+        
         /// 没有响应
         case noResponse
+        
         /// 无效的内容类型
         case invalidContentType(KBHTTP.ContentType, [String: Any]?, KBHTTP.Request.Content?)
-        /// HTTP错误
-        case httpError(Int, String)
         
-        init(statusCode: Int) {
-            self = .httpError(statusCode, HTTPURLResponse.localizedString(forStatusCode: statusCode))
+        /// 请求错误
+        case requestError(AFError)
+        
+        /// 响应错误
+        case responseError(Int, String)
+        
+        init(responseStatusCode statusCode: Int) {
+            self = .responseError(statusCode, HTTPURLResponse.localizedString(forStatusCode: statusCode))
         }
     }
 }

@@ -37,7 +37,7 @@ public final class Request: Operation {
     public var responseParser: ResponseParser?
     
     /// 完成的处理
-    private var completionHandler: ((Request, Result<Response, Swift.Error>) -> Void)?
+    private var completionHandler: ((Request, Result<Response, Request.Error>) -> Void)?
     
     
     // MARK: - Interface Methods
@@ -65,7 +65,7 @@ public final class Request: Operation {
                 sender: RequestSender? = nil,
                 responseParser: ResponseParser? = nil,
                 isBlockOtherRequests: Bool = false,
-                completionHandler: ((Request, Result<Response, Swift.Error>) -> Void)?) {
+                completionHandler: ((Request, Result<Response, Request.Error>) -> Void)?) {
         
         self.method                 = method
         self.url                    = url
@@ -85,15 +85,15 @@ public final class Request: Operation {
         super.cancel()
         
         guard let sender = self.sender else {
-            self.finishRequest(.failure(Error.cancel))
+            self.finishRequest(.failure(.cancel))
             return
         }
         
         do {
             try sender.cancel(request: self)
-            self.finishRequest(.failure(Error.cancel))
+            self.finishRequest(.failure(.cancel))
         } catch {
-            self.finishRequest(.failure(error))
+            self.finishRequest(.failure(.senderError(error)))
         }
     }
     
@@ -115,7 +115,7 @@ public final class Request: Operation {
         didChangeValue(for: \Request.isExecuting)
         
         guard let sender = sender else {
-            finishRequest(.failure(Error.noSender))
+            finishRequest(.failure(.noSender))
             return
         }
         
@@ -131,14 +131,14 @@ public final class Request: Operation {
                         }
                         self?.finishRequest(.success(response))
                     } catch {
-                        self?.finishRequest(.failure(error))
+                        self?.finishRequest(.failure(.parsingError(error)))
                     }
                 case let .failure(error):
-                    self?.finishRequest(.failure(error))
+                    self?.finishRequest(.failure(.senderError(error)))
                 }
             }
         } catch {
-            finishRequest(.failure(error))
+            finishRequest(.failure(.senderError(error)))
         }
     }
     
@@ -158,7 +158,7 @@ public final class Request: Operation {
     // MARK: - Helper Methods
     
     /// 完成请求
-    private func finishRequest(_ result: Result<Response, Swift.Error>) {
+    private func finishRequest(_ result: Result<Response, Request.Error>) {
         
         defer {
             self.completionHandler = nil
@@ -233,7 +233,7 @@ extension Request {
         /// 请求中
         case requesting
         /// 请求失败
-        case requestFailed(Swift.Error)
+        case requestFailed(Request.Error)
         /// 请求成功
         case requestSucceeded(Response)
     }
@@ -244,6 +244,10 @@ extension Request {
         case noSender
         /// 取消请求
         case cancel
+        /// 发送者错误
+        case senderError(Swift.Error)
+        /// 解析错误
+        case parsingError(Swift.Error)
     }        
 }
 

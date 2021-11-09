@@ -7,6 +7,7 @@
 
 import XCTest
 import KBHTTP
+import Alamofire
 
 class AlamofireRequestSenderTests: XCTestCase {
     
@@ -200,7 +201,7 @@ class URLEncodedGETInterface: KBHTTP.RequestInterface, KBHTTP.ResponseParser {
     
     @discardableResult
     func request(with parameters: DemoRequestParameters?,
-                 completionHandler: @escaping ((Result<DemoResponseValue, DemoResponseError>) -> Void)) -> Request {
+                 completionHandler: @escaping ((Result<DemoResponseValue, ResponseError>) -> Void)) -> KBHTTP.Request {
         let request = KBHTTP.Request(method: self.method,
                                      url: self.url,
                                      headers: self.headers,
@@ -208,18 +209,18 @@ class URLEncodedGETInterface: KBHTTP.RequestInterface, KBHTTP.ResponseParser {
                                      content: nil,
                                      contentType: self.contentType,
                                      dynamicHeadersProvider: nil,
-                                     sender: KBHTTP.AlamofireRequestSender(),
+                                     sender: KBHTTP.AlamofireRequestSender(session: AF),
                                      responseParser: self,
                                      isBlockOtherRequests: false) { request, result in
             switch result {
             case .success(let response):
                 guard let value = response.value as? ResponseValue else {
-                    completionHandler(.failure(.nullValue))
+//                    completionHandler(.failure())
                     return
                 }
                 completionHandler(.success(value))
             case .failure(let error):
-                completionHandler(.failure(.init(error)))
+                completionHandler(.failure(ResponseError(error)))
             }
         }
         
@@ -231,11 +232,11 @@ class URLEncodedGETInterface: KBHTTP.RequestInterface, KBHTTP.ResponseParser {
     func parse(response: Response) throws -> Any? {
         
         guard response.statusCode == 200 else {
-            throw ResponseError(code: response.statusCode)
+            return nil
         }
         
         guard let data = response.data else {
-            throw ResponseError.nullValue
+            return nil
         }
         
         let result = try JSONDecoder().decode(DemoResponseValue.self, from: data)
@@ -244,13 +245,13 @@ class URLEncodedGETInterface: KBHTTP.RequestInterface, KBHTTP.ResponseParser {
 }
 
 class URLEncodedPOSTInterface: URLEncodedGETInterface {
-    override var method: Request.Method {
+    override var method: KBHTTP.Request.Method {
         return .post
     }
 }
 
 class JSONPOSTInterface: URLEncodedPOSTInterface {
-    override var method: Request.Method {
+    override var method: KBHTTP.Request.Method {
         return .post
     }
     
@@ -267,9 +268,9 @@ class CustomUploadInterface: KBHTTP.UploadInterface, KBHTTP.ResponseParser {
     typealias ResponseError = DemoResponseError
     
     @discardableResult
-    func upload(_ content: Request.Content,
+    func upload(_ content: KBHTTP.Request.Content,
                 contentType: ContentType,
-                completionHandler: @escaping ((Result<DemoResponseValue, DemoResponseError>) -> Void)) -> Request {
+                completionHandler: @escaping ((Result<DemoResponseValue, ResponseError>) -> Void)) -> KBHTTP.Request {
         
         let request = KBHTTP.Request(method: .post,
                                      url: self.url,
@@ -278,18 +279,18 @@ class CustomUploadInterface: KBHTTP.UploadInterface, KBHTTP.ResponseParser {
                                      content: content,
                                      contentType: contentType,
                                      dynamicHeadersProvider: nil,
-                                     sender: KBHTTP.AlamofireRequestSender(),
+                                     sender: KBHTTP.AlamofireRequestSender(session: AF),
                                      responseParser: self,
                                      isBlockOtherRequests: false) { request, result in
             switch result {
             case .success(let response):
                 guard let value = response.value as? ResponseValue else {
-                    completionHandler(.failure(.nullValue))
+                    assertionFailure("错误啦")
                     return
                 }
                 completionHandler(.success(value))
             case .failure(let error):
-                completionHandler(.failure(.init(error)))
+                completionHandler(.failure(ResponseError(error)))
             }
         }
         
@@ -301,11 +302,11 @@ class CustomUploadInterface: KBHTTP.UploadInterface, KBHTTP.ResponseParser {
     func parse(response: Response) throws -> Any? {
         
         guard response.statusCode == 200 else {
-            throw ResponseError(code: response.statusCode)
+            return nil
         }
         
         guard let data = response.data else {
-            throw ResponseError.nullValue
+            return nil
         }
         
         let result = try JSONDecoder().decode(DemoResponseValue.self, from: data)
@@ -317,7 +318,7 @@ class StreamCustomUploadInterface: CustomUploadInterface {
     override var url: URL { URL(string: "http://localhost:8080/kbhttp/file/stream")! }
 }
 
-struct DemoResponseError: KBHTTP.InterfaceError {
+struct DemoResponseError: InterfaceResponseError {
     
     var code: Int = 0
                     
@@ -336,6 +337,22 @@ struct DemoResponseError: KBHTTP.InterfaceError {
     }
     
     static let nullValue = DemoResponseError()
+    
+    init(parsingError: Error) {
+        self.code = 0
+    }
+    
+    init(requestError: Error) {
+        self.code = 0
+    }
+    
+    init(networkError: Error) {
+        self.code = 0
+    }
+    
+    init(_ requestError: KBHTTP.Request.Error) {
+        self.code = 0
+    }
 }
 
 struct DemoRequestParameters: DictionaryConvertible {
