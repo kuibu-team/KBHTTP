@@ -117,7 +117,7 @@ class AlamofireRequestInterfaceTests: XCTestCase {
 
 // MARK: - KBDemoInterface
 
-struct KBDemoResponseError: Swift.Error {
+struct KBDemoResponseError: AlamofireInterfaceResponseError {
     
     var code: Int
     var message: String
@@ -160,9 +160,17 @@ struct KBDemoResponseError: Swift.Error {
         
         self.underlying = parsingError
     }
+    
+    init(_ interfaceError: KBHTTP.AlamofireInterfaceError) {
+        let nserr = interfaceError as NSError
+        code = nserr.code
+        message = interfaceError.localizedDescription
+        
+        self.underlying = interfaceError
+    }
 }
 
-protocol KBDemoRequestInterface: AlamofireRequestInterface where ResponseValue: Decodable, ResponseError == DemoResponseError {
+protocol KBDemoRequestInterface: AlamofireRequestInterface where ResponseValue: Decodable, ResponseError == KBDemoResponseError {
     
 }
 
@@ -187,7 +195,7 @@ extension KBDemoRequestInterface {
     }
 }
 
-protocol KBDemoUploadInterface: AlamofireUploadInterface where ResponseValue: Decodable {
+protocol KBDemoUploadInterface: AlamofireUploadInterface where ResponseValue: Decodable, ResponseError == KBDemoResponseError {
     
 }
 
@@ -295,15 +303,11 @@ class DemoJSONInterface: KBDemoRequestInterface {
 // MARK: - DemoPOSTInterface
 
 class FileUploadInterface: KBDemoUploadInterface {
-    typealias ResponseError = DemoResponseError
-    
     var url: URL = URL(string: "http://localhost:8080/kbhttp/file")!
     typealias ResponseValue = DemoResponseValue
 }
 
 class FileStreamUploadInterface: KBDemoUploadInterface {
-    typealias ResponseError = DemoResponseError
-    
     var url: URL = URL(string: "http://localhost:8080/kbhttp/file/stream")!
     typealias ResponseValue = DemoResponseValue
 }

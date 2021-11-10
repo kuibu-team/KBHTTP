@@ -67,23 +67,5 @@ class ErrorTestGETInterface: KBDemoRequestInterface {
         }
     }
     
-    typealias ResponseValue = DemoResponseValue
-}
-
-enum MyNetworkError: Swift.Error {
-    case cancel
-    case timeout
-    case networkUnavailable
-}
-
-enum MyHTTPError: InterfaceResponseError {
-    case requestFailed(Swift.Error)
-    case networkError(Swift.Error)
-    case parsingFailed(Swift.Error)
-    case businessError(Swift.Error)
-    case unknownError(Swift.Error)
-    
-    init(_ requestError: KBHTTP.Request.Error) {
-        self = .unknownError(requestError)
-    }
+    typealias ResponseValue = DemoResponseValue    
 }

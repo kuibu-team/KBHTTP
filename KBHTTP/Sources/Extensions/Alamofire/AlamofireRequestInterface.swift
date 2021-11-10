@@ -9,7 +9,7 @@ import Foundation
 import Alamofire
 
 /// Alamofire的请求接口
-public protocol AlamofireRequestInterface: KBHTTP.RequestInterface, KBHTTP.ResponseParser {
+public protocol AlamofireRequestInterface: KBHTTP.RequestInterface, KBHTTP.ResponseParser where ResponseError: AlamofireInterfaceResponseError {
     
     /// 动态头部提供者
     var dynamicHeadersProvider: DynamicHeadersProvider? { get }
@@ -44,7 +44,8 @@ public extension AlamofireRequestInterface {
             switch result {
             case .success(let response):
                 guard let value = response.value as? ResponseValue else {
-                    assertionFailure("please return the correct data type. type is \(ResponseValue.self), value is \(response.value ?? "nil")")
+                    let interfaceError = AlamofireInterfaceError.incorrectResponseValueType(ResponseValue.self, response.value)
+                    completionHandler(.failure(ResponseError(interfaceError)))
                     return
                 }
                 completionHandler(.success(value))
