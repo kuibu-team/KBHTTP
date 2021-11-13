@@ -17,6 +17,9 @@ public protocol AlamofireRequestInterface: KBHTTP.RequestInterface, KBHTTP.Respo
     /// 是否dump响应内容，用于调试，建议在Debug模式下开启，方便调试，在Release模式下关闭
     var dumpResponse: Bool { get }
     
+    /// dump时，是否解码内容，默认事false
+    var dumpDecodeContent: Bool { get }
+    
     /// 请求的会话
     var session: Alamofire.Session { get }
     
@@ -38,7 +41,7 @@ public extension AlamofireRequestInterface {
                                      content: nil,
                                      contentType: self.contentType,
                                      dynamicHeadersProvider: self.dynamicHeadersProvider,
-                                     sender: KBHTTP.AlamofireRequestSender(session: self.session, dumpResponse: self.dumpResponse),
+                                     sender: KBHTTP.AlamofireRequestSender(session: self.session, dumpResponse: self.dumpResponse, dumpDecodeContent: self.dumpDecodeContent),
                                      responseParser: self,
                                      isBlockOtherRequests: self.isBlockOtherRequests) { request, result in
             switch result {

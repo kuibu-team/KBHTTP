@@ -224,11 +224,19 @@ extension KBDemoRequestInterface {
     var dumpResponse: Bool {
         return true
     }
+    
+    var dumpDecodeContent: Bool {
+        return false
+    }
 }
 
 extension KBDemoUploadInterface {
     var dumpResponse: Bool {
         return true
+    }
+    
+    var dumpDecodeContent: Bool {
+        return false
     }
 }
 

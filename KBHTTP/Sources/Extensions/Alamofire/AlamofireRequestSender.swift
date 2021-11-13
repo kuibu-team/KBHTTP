@@ -17,6 +17,9 @@ public class AlamofireRequestSender: KBHTTP.RequestSender {
     /// dump响应的内容，建议在Debug模式下开启，方便调试，在Release模式下关闭
     public var dumpResponse: Bool
     
+    /// dump时，是否解码内容，默认事false
+    public var dumpDecodeContent: Bool
+    
     /// AF请求的会话
     public var session: Alamofire.Session
     
@@ -24,9 +27,10 @@ public class AlamofireRequestSender: KBHTTP.RequestSender {
     // MARK: - Interface Methods
     
     /// 初始化方法
-    public init(session: Alamofire.Session, dumpResponse: Bool = false) {
+    public init(session: Alamofire.Session, dumpResponse: Bool = false, dumpDecodeContent: Bool = false) {
         self.session = session
         self.dumpResponse = dumpResponse
+        self.dumpDecodeContent = false
     }
 
     /// 发送请求
@@ -159,8 +163,8 @@ public class AlamofireRequestSender: KBHTTP.RequestSender {
         if let urlResponse = response.response,
            let urlRequest = response.request,
            let data = response.data {
-            let requestDumpText = urlRequest.dump(with: self.session.session, decodeContent: true)
-            let responseDumpText = urlResponse.dump(with: data, decodeContent: true)
+            let requestDumpText = urlRequest.dump(with: self.session.session, decodeContent: self.dumpDecodeContent)
+            let responseDumpText = urlResponse.dump(with: data, decodeContent: self.dumpDecodeContent)
             let dumpText = """
                            
                            >>> AF Request >>>
